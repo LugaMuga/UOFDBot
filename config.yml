@@ -1,0 +1,10 @@
+bot_name: UOFDBot
+bot_token: <TOKEN>
+bot_timeout: 60
+connection_type: CHANNEL # CHANNEL or WEBHOOK
+db_path: ./uofd.db
+webhook_host: 192.168.0.1
+webhook_port: 8443
+webhook_cert_path: cert.pem
+webhook_key_path: key.pem
+server_adress: 0.0.0.0
