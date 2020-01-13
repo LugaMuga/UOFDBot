@@ -93,6 +93,9 @@ func applyCommand(update tgbotapi.Update) {
 	case `/delete`, `/delete@` + config.BotName:
 		delete(*message)
 		break
+	case `/list`, `/list@` + config.BotName:
+		list(message.Chat.ID)
+		break
 	case `/pidor`, `/pidor@` + config.BotName:
 		pidor(message.Chat.ID)
 		break

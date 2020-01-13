@@ -1,6 +1,7 @@
 bot_name: UOFDBot
 bot_token: <TOKEN>
 bot_timeout: 60
+bot_time_layout: 2006-01-02 15:04:05
 connection_type: CHANNEL # CHANNEL or WEBHOOK
 db_path: ./uofd.db
 webhook_host: 192.168.0.1

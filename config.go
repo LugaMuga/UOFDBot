@@ -4,11 +4,9 @@ import (
 	"github.com/goccy/go-yaml"
 	"io/ioutil"
 	"log"
-	"time"
 )
 
 const ConfigFile string = `./config.yml`
-const GameInterval = int64(24*time.Hour) / int64(time.Millisecond)
 const ConnectionTypeChannel string = `CHANNEL`
 const ConnectionTypeWebhook string = `WEBHOOK`
 
@@ -16,6 +14,7 @@ var config struct {
 	BotName         string `yaml:"bot_name"`
 	BotToken        string `yaml:"bot_token"`
 	BotTimeout      int    `yaml:"bot_timeout"`
+	BotTimeLayout   string `yaml:"bot_time_layout"`
 	ConnectionType  string `yaml:"connection_type"`
 	DbPath          string `yaml:"db_path"`
 	WebhookHost     string `yaml:"webhook_host"`

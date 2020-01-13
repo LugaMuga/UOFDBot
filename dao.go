@@ -159,7 +159,7 @@ func findEnabledChatUserWonInGameIntervalByChatId(chatId int64, timestampField s
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	rows, err := stmt.Query(chatId, nowMinusIntervalTimestamp())
+	rows, err := stmt.Query(chatId, getLastMidnight())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -236,7 +236,9 @@ func getEnabledScoreListBChatId(chatId int64, orderedField string) []ChatUser {
 			   user_first_name,
 			   user_last_name,
 			   pidor_score,
-			   hero_score
+		       pidor_last_timestamp,
+			   hero_score,
+		       hero_last_timestamp
 		FROM chat_user
 		WHERE chat_id = ? AND enabled
 		ORDER BY ` + orderedField + ` DESC`)
@@ -258,7 +260,9 @@ func getEnabledScoreListBChatId(chatId int64, orderedField string) []ChatUser {
 			&chatUser.userFirstName,
 			&chatUser.userLastName,
 			&chatUser.pidorScore,
-			&chatUser.heroScore)
+			&chatUser.pidorLastTimestamp,
+			&chatUser.heroScore,
+			&chatUser.heroLastTimestamp)
 		if err != nil {
 			log.Fatal(err)
 		}

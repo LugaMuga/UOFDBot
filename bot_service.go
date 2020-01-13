@@ -60,7 +60,7 @@ func pidor(chatId int64) {
 		return
 	}
 	chatUsers[winnerIndex].pidorScore += 1
-	chatUsers[winnerIndex].pidorLastTimestamp = nowTimestamp()
+	chatUsers[winnerIndex].pidorLastTimestamp = nowUnix()
 	UpdateChatUserPidorWins(chatUsers[winnerIndex])
 	msg := FormatPidorWinner(chatUsers[winnerIndex])
 	SendMessage(chatId, msg)
@@ -91,7 +91,7 @@ func hero(chatId int64) {
 		return
 	}
 	chatUsers[winnerIndex].heroScore += 1
-	chatUsers[winnerIndex].heroLastTimestamp = nowTimestamp()
+	chatUsers[winnerIndex].heroLastTimestamp = nowUnix()
 	UpdateChatUserHeroWins(chatUsers[winnerIndex])
 	msg := FormatHeroWinner(chatUsers[winnerIndex])
 	SendMessage(chatId, msg)
@@ -116,4 +116,9 @@ func resetApproval(chatId int64, approvalOption string) {
 			tgbotapi.NewInlineKeyboardButtonData("Нет", resetCancellation),
 		))
 	_, _ = bot.Send(msg)
+}
+
+func list(chatId int64) {
+	pidorList(chatId)
+	heroList(chatId)
 }

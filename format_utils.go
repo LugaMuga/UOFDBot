@@ -3,9 +3,11 @@ package main
 import (
 	"strconv"
 	"strings"
+	"time"
 )
 
 type winFunc func(int) string
+type comparatorFunc func(ChatUser, int64) int64
 
 func FormatUserName(username string, firstName string, lastName string) string {
 	if len(username) > 0 {
@@ -41,17 +43,33 @@ func formatWinnerMsg(chatUser ChatUser, title string) string {
 }
 
 func FormatListOfPidors(chatUsers []ChatUser) string {
+	lastRunPidorComparator := func(chatUser ChatUser, lastRun int64) int64 {
+		if chatUser.pidorLastTimestamp > 0 && chatUser.pidorLastTimestamp > lastRun {
+			return chatUser.pidorLastTimestamp
+		}
+		return lastRun
+	}
+	lastTimeRun := findLastTimeRun(chatUsers, lastRunPidorComparator)
+
 	getNumberOfWins := func(i int) string {
 		return strconv.Itoa(chatUsers[i].pidorScore)
 	}
-	return formatListOfGames(chatUsers, "Итоги 'пидора дня' \U0001F308", getNumberOfWins)
+	return formatListOfGames(chatUsers, "Итоги 'пидора дня' \U0001F308 "+lastTimeRun, getNumberOfWins)
 }
 
 func FormatListOfHeros(chatUsers []ChatUser) string {
+	lastRunHeroComparator := func(chatUser ChatUser, lastRun int64) int64 {
+		if chatUser.pidorLastTimestamp > 0 && chatUser.heroLastTimestamp > lastRun {
+			return chatUser.heroLastTimestamp
+		}
+		return lastRun
+	}
+	lastTimeRun := findLastTimeRun(chatUsers, lastRunHeroComparator)
+
 	getNumberOfWins := func(i int) string {
 		return strconv.Itoa(chatUsers[i].heroScore)
 	}
-	return formatListOfGames(chatUsers, "Итоги 'героя дня' \U0001F31F", getNumberOfWins)
+	return formatListOfGames(chatUsers, "Итоги 'героя дня' \U0001F31F "+lastTimeRun, getNumberOfWins)
 }
 
 func formatListOfGames(chatUsers []ChatUser, title string, getNumberOfWins winFunc) string {
@@ -67,4 +85,19 @@ func formatListOfGames(chatUsers []ChatUser, title string, getNumberOfWins winFu
 		sb.WriteString("\n")
 	}
 	return sb.String()
+}
+
+func findLastTimeRun(chatUsers []ChatUser, comparator comparatorFunc) string {
+	if len(config.BotTimeLayout) == 0 {
+		return ``
+	}
+	var lastRun int64 = 0
+	for _, chatUser := range chatUsers {
+		lastRun = comparator(chatUser, lastRun)
+	}
+	if lastRun == 0 {
+		return `(последний запуск: никогда)`
+	}
+	lastRunTime := time.Unix(lastRun, 0)
+	return `(последний запуск: ` + lastRunTime.Format(config.BotTimeLayout) + `)`
 }
