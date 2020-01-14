@@ -18,3 +18,4 @@
 *.iml
 
 *backup
+*.db

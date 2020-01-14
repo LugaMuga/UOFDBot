@@ -21,8 +21,9 @@ func play(chatUsers []ChatUser) int {
 
 func register(message tgbotapi.Message) {
 	chatUser := findChatUserByUserIdAndChatId(message.From.ID, message.Chat.ID)
+	username := FormatUserName(message.From.UserName, message.From.FirstName, message.From.LastName)
 	if chatUser != nil && chatUser.enabled {
-		SendMessage(message.Chat.ID, `Пользователь `+FormatUserName(message.From.UserName, message.From.FirstName, message.From.LastName)+` уже участвует`)
+		SendMessage(message.Chat.ID, loc(defaultLang, `user_already_registered`, username))
 		return
 	}
 	if chatUser == nil {
@@ -31,19 +32,20 @@ func register(message tgbotapi.Message) {
 	chatUser.fillFromMessage(message)
 	chatUser.enabled = true
 	SaveOrUpdateChatUser(*chatUser)
-	SendMessage(message.Chat.ID, `Пользователь `+FormatUserName(message.From.UserName, message.From.FirstName, message.From.LastName)+` зарегистрирован`)
+	SendMessage(message.Chat.ID, loc(defaultLang, `user_registered`, username))
 }
 
 func delete(message tgbotapi.Message) {
 	chatUser := findChatUserByUserIdAndChatId(message.From.ID, message.Chat.ID)
+	username := FormatUserName(message.From.UserName, message.From.FirstName, message.From.LastName)
 	if chatUser == nil || !chatUser.enabled {
-		SendMessage(message.Chat.ID, `Пользователь `+FormatUserName(message.From.UserName, message.From.FirstName, message.From.LastName)+` и так не в теме`)
+		SendMessage(message.Chat.ID, loc(defaultLang, `user_not_participating`, username))
 		return
 	}
 	chatUser.fillFromMessage(message)
 	chatUser.enabled = false
 	UpdateChatUserStatus(*chatUser)
-	SendMessage(message.Chat.ID, `Пользователь `+FormatUserName(message.From.UserName, message.From.FirstName, message.From.LastName)+` вышел`)
+	SendMessage(message.Chat.ID, loc(defaultLang, `user_deleted`, username))
 }
 
 func pidor(chatId int64) {
@@ -56,7 +58,7 @@ func pidor(chatId int64) {
 	chatUsers := getEnabledChatUsersByChatId(chatId)
 	winnerIndex := play(chatUsers)
 	if winnerIndex < 0 {
-		SendMessage(chatId, `Необходим хотя бы один участник`)
+		SendMessage(chatId, loc(defaultLang, `at_least_one_user`))
 		return
 	}
 	chatUsers[winnerIndex].pidorScore += 1
@@ -74,7 +76,9 @@ func pidorList(chatId int64) {
 
 func resetPidor(chatId int64) {
 	ResetPidorScoreByChatId(chatId)
-	SendMessage(chatId, `Статистика 'пидора дня' сброшена!`)
+	gameName := loc(defaultLang, `pidor_of_day`)
+	msg := loc(defaultLang, `stat_reset`, gameName)
+	SendMessage(chatId, msg)
 }
 
 func hero(chatId int64) {
@@ -87,7 +91,7 @@ func hero(chatId int64) {
 	chatUsers := getEnabledChatUsersByChatId(chatId)
 	winnerIndex := play(chatUsers)
 	if winnerIndex < 0 {
-		SendMessage(chatId, `Необходим хотя бы один участник`)
+		SendMessage(chatId, loc(defaultLang, `at_least_one_user`))
 		return
 	}
 	chatUsers[winnerIndex].heroScore += 1
@@ -105,17 +109,24 @@ func heroList(chatId int64) {
 
 func resetHero(chatId int64) {
 	ResetHeroScoreByChatId(chatId)
-	SendMessage(chatId, `Статистика 'героя дня' сброшена!`)
+	gameName := loc(defaultLang, `hero_of_day`)
+	msg := loc(defaultLang, `stat_reset`, gameName)
+	SendMessage(chatId, msg)
 }
 
 func resetApproval(chatId int64, approvalOption string) {
-	msg := tgbotapi.NewMessage(chatId, `Вы уверены?`)
+	msg := tgbotapi.NewMessage(chatId, loc(defaultLang, `a_u_sure`))
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Да", approvalOption),
-			tgbotapi.NewInlineKeyboardButtonData("Нет", resetCancellation),
+			tgbotapi.NewInlineKeyboardButtonData(loc(defaultLang, `yes`), approvalOption),
+			tgbotapi.NewInlineKeyboardButtonData(loc(defaultLang, `no`), resetCancellation),
 		))
 	_, _ = bot.Send(msg)
+}
+
+func run(chatId int64) {
+	pidor(chatId)
+	hero(chatId)
 }
 
 func list(chatId int64) {

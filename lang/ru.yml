@@ -1,0 +1,64 @@
+hello:
+  description: "Hello"
+  other: "Ну привет!"
+pidor_of_day:
+  description: "Pidor of the day"
+  other: "пидора дня"
+hero_of_day:
+  description: "Hero of the day"
+  other: "героя дня"
+stat_reset:
+  description: "Statistics reset"
+  other: "Стастистика '{{.a}}' сброшена!"
+stat_not_reset:
+  description: "Statistics not reset"
+  other: "Стастистика НЕ сброшена!"
+yes:
+  description: "Yes"
+  other: "Да"
+no:
+  description: "No"
+  other: "Нет"
+a_u_sure:
+  description: "Are you sure?"
+  other: "Вы уверены?"
+at_least_one_user:
+  description: "Needs at least one user"
+  other: "Необходим хотя бы один участник"
+user_registered:
+  description: "User registered"
+  other: "Пользователь {{.a}} зарегистрирован"
+user_already_registered:
+  description: "User already registered"
+  other: "Пользователь {{.a}} уже участвует"
+user_not_participating:
+  description: "User not participating"
+  other: "Пользователь {{.a}} и так не в теме"
+user_deleted:
+  description: "User deleted"
+  other: "Пользователь {{.a}} вышел"
+last_run:
+  description: "last run"
+  other: "(последний запуск: {{.a}})"
+never:
+  description: "never"
+  other: "никогда"
+today_pidor:
+  description: "Today PIDOR of the day"
+  other: "Сегодня ПИДОР дня"
+today_hero:
+  description: "Today HERO of the day"
+  other: "Сегодня ГЕРОЙ дня"
+today_pidor_selected:
+  description: "Today PIDOR of the day already selected"
+  other: "Сегодня ПИДОР дня уже был выбран"
+today_hero_selected:
+  description: "Today HERO of the day already selected"
+  other: "Сегодня ГЕРОЙ дня уже был выбран"
+win_times:
+  description: "How many times user win"
+  one: "{{.a}} раз"
+  few: "{{.a}} раз(а)"
+results_by_game:
+  description: "Results by game"
+  other: "Итоги {{.a}}"

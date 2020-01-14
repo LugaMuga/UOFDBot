@@ -1,0 +1,64 @@
+hello:
+  description: "Hello"
+  other: "Hey!"
+pidor_of_day:
+  description: "Pidor of the day"
+  other: "pidor of the day"
+hero_of_day:
+  description: "Hero of the day"
+  other: "hero of the day"
+stat_reset:
+  description: "Statistics reset"
+  other: "Statistics '{{.a}}' reset!"
+stat_not_reset:
+  description: "Statistics not reset"
+  other: "Statistics NOT reset!"
+yes:
+  description: "Yes"
+  other: "Yes"
+no:
+  description: "No"
+  other: "No"
+a_u_sure:
+  description: "Are you sure?"
+  other: "Are you sure?"
+at_least_one_user:
+  description: "Needs at least one user"
+  other: "Needs at least one user"
+user_registered:
+  description: "User registered"
+  other: "User {{.a}} registered"
+user_already_registered:
+  description: "User already registered"
+  other: "User {{.a}} already registered"
+user_not_participating:
+  description: "User not participating"
+  other: "User {{.a}} not participating"
+user_deleted:
+  description: "User deleted"
+  other: "User {{.a}} deleted"
+last_run:
+  description: "last run"
+  other: "(last run: {{.a}})"
+never:
+  description: "never"
+  other: "never"
+today_pidor:
+  description: "Today PIDOR of the day"
+  other: "Today PIDOR of the day"
+today_hero:
+  description: "Today HERO of the day"
+  other: "Today HERO of the day"
+today_pidor_selected:
+  description: "Today PIDOR of the day already selected"
+  other: "Today PIDOR of the day already selected"
+today_hero_selected:
+  description: "Today HERO of the day already selected"
+  other: "Today HERO of the day already selected"
+win_times:
+  description: "How many times user win"
+  one: "{{.a}} time"
+  few: "{{.a}} times"
+results_by_game:
+  description: "Results by game"
+  other: "Results {{.a}}"

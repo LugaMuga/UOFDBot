@@ -10,6 +10,7 @@ var bot *tgbotapi.BotAPI
 
 func main() {
 	LoadConfig()
+	LoadI18N()
 	InitDb()
 	registerBot()
 	if config.ConnectionType == ConnectionTypeWebhook {
@@ -83,15 +84,18 @@ func applyCommand(update tgbotapi.Update) {
 
 	message := update.Message
 	switch update.Message.Text {
-	case `/start`:
-	case `/start@` + config.BotName:
-		SendMessage(update.Message.Chat.ID, `Ну привет!`)
+	case `/start`, `/start@` + config.BotName:
+		msg := loc(defaultLang, `hello`)
+		SendMessage(update.Message.Chat.ID, msg)
 		break
 	case `/register`, `/register@` + config.BotName:
 		register(*message)
 		break
 	case `/delete`, `/delete@` + config.BotName:
 		delete(*message)
+		break
+	case `/run`, `/run@` + config.BotName:
+		run(message.Chat.ID)
 		break
 	case `/list`, `/list@` + config.BotName:
 		list(message.Chat.ID)
@@ -133,8 +137,9 @@ func applyCallbackQuery(update tgbotapi.Update) {
 		resetHero(message.Chat.ID)
 		break
 	default:
-		bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, `Стаститика НЕ сброшена`))
-		SendMessage(message.Chat.ID, `Стаститика НЕ сброшена`)
+		msg := loc(defaultLang, `stat_not_reset`)
+		bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, msg))
+		SendMessage(message.Chat.ID, msg)
 	}
 	deleteKeyBoardMsg := tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID)
 	_, _ = bot.Send(deleteKeyBoardMsg)

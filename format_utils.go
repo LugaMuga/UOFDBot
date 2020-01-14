@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type winFunc func(int) string
+type winFunc func(int) int
 type comparatorFunc func(ChatUser, int64) int64
 
 func FormatUserName(username string, firstName string, lastName string) string {
@@ -17,19 +17,19 @@ func FormatUserName(username string, firstName string, lastName string) string {
 }
 
 func FormatActivePidorWinner(chatUser ChatUser) string {
-	return formatWinnerMsg(chatUser, "\U0001F308Сегодня ПИДОР дня уже был выбран - ")
+	return formatWinnerMsg(chatUser, "\U0001F308"+loc(defaultLang, `today_pidor_selected`)+" - ")
 }
 
 func FormatActiveHeroWinner(chatUser ChatUser) string {
-	return formatWinnerMsg(chatUser, "\U0001F31FСегодня ГЕРОЙ дня уже был выбран - ")
+	return formatWinnerMsg(chatUser, "\U0001F31F"+loc(defaultLang, `today_hero_selected`)+" - ")
 }
 
 func FormatPidorWinner(chatUser ChatUser) string {
-	return formatWinnerMsg(chatUser, "\U0001F308Сегодня ПИДОР дня - ")
+	return formatWinnerMsg(chatUser, "\U0001F308"+loc(defaultLang, `today_pidor`)+" - ")
 }
 
 func FormatHeroWinner(chatUser ChatUser) string {
-	return formatWinnerMsg(chatUser, "\U0001F31FСегодня ГЕРОЙ дня - ")
+	return formatWinnerMsg(chatUser, "\U0001F31F"+loc(defaultLang, `today_hero`)+" - ")
 }
 
 func formatWinnerMsg(chatUser ChatUser, title string) string {
@@ -51,25 +51,27 @@ func FormatListOfPidors(chatUsers []ChatUser) string {
 	}
 	lastTimeRun := findLastTimeRun(chatUsers, lastRunPidorComparator)
 
-	getNumberOfWins := func(i int) string {
-		return strconv.Itoa(chatUsers[i].pidorScore)
+	getNumberOfWins := func(i int) int {
+		return chatUsers[i].pidorScore
 	}
-	return formatListOfGames(chatUsers, "Итоги 'пидора дня' \U0001F308 "+lastTimeRun, getNumberOfWins)
+	resultsMsg := loc(defaultLang, `results_by_game`, loc(defaultLang, `pidor_of_day`))
+	return formatListOfGames(chatUsers, resultsMsg+" \U0001F308 "+lastTimeRun, getNumberOfWins)
 }
 
 func FormatListOfHeros(chatUsers []ChatUser) string {
 	lastRunHeroComparator := func(chatUser ChatUser, lastRun int64) int64 {
-		if chatUser.pidorLastTimestamp > 0 && chatUser.heroLastTimestamp > lastRun {
+		if chatUser.heroLastTimestamp > 0 && chatUser.heroLastTimestamp > lastRun {
 			return chatUser.heroLastTimestamp
 		}
 		return lastRun
 	}
 	lastTimeRun := findLastTimeRun(chatUsers, lastRunHeroComparator)
 
-	getNumberOfWins := func(i int) string {
-		return strconv.Itoa(chatUsers[i].heroScore)
+	getNumberOfWins := func(i int) int {
+		return chatUsers[i].heroScore
 	}
-	return formatListOfGames(chatUsers, "Итоги 'героя дня' \U0001F31F "+lastTimeRun, getNumberOfWins)
+	resultsMsg := loc(defaultLang, `results_by_game`, loc(defaultLang, `hero_of_day`))
+	return formatListOfGames(chatUsers, resultsMsg+" \U0001F31F "+lastTimeRun, getNumberOfWins)
 }
 
 func formatListOfGames(chatUsers []ChatUser, title string, getNumberOfWins winFunc) string {
@@ -81,7 +83,8 @@ func formatListOfGames(chatUsers []ChatUser, title string, getNumberOfWins winFu
 		if len(chatUsers[i].username) > 0 {
 			sb.WriteString(` (@` + chatUsers[i].username + `)`)
 		}
-		sb.WriteString(` - ` + getNumberOfWins(i) + ` раз(а)`)
+		timesText := locPlural(defaultLang, "win_times", getNumberOfWins(i), getNumberOfWins(i))
+		sb.WriteString(` - ` + timesText)
 		sb.WriteString("\n")
 	}
 	return sb.String()
@@ -96,8 +99,8 @@ func findLastTimeRun(chatUsers []ChatUser, comparator comparatorFunc) string {
 		lastRun = comparator(chatUser, lastRun)
 	}
 	if lastRun == 0 {
-		return `(последний запуск: никогда)`
+		return loc(defaultLang, `last_run`, loc(defaultLang, `never`))
 	}
 	lastRunTime := time.Unix(lastRun, 0)
-	return `(последний запуск: ` + lastRunTime.Format(config.BotTimeLayout) + `)`
+	return loc(defaultLang, `last_run`, lastRunTime.Format(config.BotTimeLayout))
 }
