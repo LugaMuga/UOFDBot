@@ -59,6 +59,7 @@ win_times:
   description: "How many times user win"
   one: "{{.a}} time"
   few: "{{.a}} times"
+  many: "{{.a}} times"
 results_by_game:
   description: "Results by game"
   other: "Results {{.a}}"
