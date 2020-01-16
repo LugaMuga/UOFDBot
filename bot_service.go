@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-const resetPidorApproval string = `RESET_PIDOR_SCORES`
-const resetHeroApproval string = `RESET_HERO_SCORES`
-const resetCancellation string = `RESET_CANCEL`
+type CallbackQueryType string
+const SimplePollType CallbackQueryType = `SIMPLE_POLL`
+const CallbackQueryParamDelimiter = `||`
 
 func play(chatUsers []ChatUser) int {
 	if len(chatUsers) <= 0 {
@@ -29,23 +29,23 @@ func register(message tgbotapi.Message) {
 	if chatUser == nil {
 		chatUser = new(ChatUser)
 	}
-	chatUser.fillFromMessage(message)
+	chatUser.fill(message.Chat.ID, message.From)
 	chatUser.enabled = true
 	SaveOrUpdateChatUser(*chatUser)
 	SendMessage(message.Chat.ID, loc(defaultLang, `user_registered`, username))
 }
 
-func delete(message tgbotapi.Message) {
-	chatUser := findChatUserByUserIdAndChatId(message.From.ID, message.Chat.ID)
-	username := FormatUserName(message.From.UserName, message.From.FirstName, message.From.LastName)
+func delete(chatId int64, user *tgbotapi.User) {
+	chatUser := findChatUserByUserIdAndChatId(user.ID, chatId)
+	username := FormatUserName(user.UserName, user.FirstName, user.LastName)
 	if chatUser == nil || !chatUser.enabled {
-		SendMessage(message.Chat.ID, loc(defaultLang, `user_not_participating`, username))
+		SendMessage(chatId, loc(defaultLang, `user_not_participating`, username))
 		return
 	}
-	chatUser.fillFromMessage(message)
+	chatUser.fill(chatId, user)
 	chatUser.enabled = false
 	UpdateChatUserStatus(*chatUser)
-	SendMessage(message.Chat.ID, loc(defaultLang, `user_deleted`, username))
+	SendMessage(chatId, loc(defaultLang, `user_deleted`, username))
 }
 
 func pidor(chatId int64) {
@@ -112,16 +112,6 @@ func resetHero(chatId int64) {
 	gameName := loc(defaultLang, `hero_of_day`)
 	msg := loc(defaultLang, `stat_reset`, gameName)
 	SendMessage(chatId, msg)
-}
-
-func resetApproval(chatId int64, approvalOption string) {
-	msg := tgbotapi.NewMessage(chatId, loc(defaultLang, `a_u_sure`))
-	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(loc(defaultLang, `yes`), approvalOption),
-			tgbotapi.NewInlineKeyboardButtonData(loc(defaultLang, `no`), resetCancellation),
-		))
-	_, _ = bot.Send(msg)
 }
 
 func run(chatId int64) {

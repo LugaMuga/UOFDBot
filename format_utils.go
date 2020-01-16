@@ -1,6 +1,7 @@
 package main
 
 import (
+	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"strconv"
 	"strings"
 	"time"
@@ -8,6 +9,14 @@ import (
 
 type winFunc func(int) int
 type comparatorFunc func(ChatUser, int64) int64
+
+func FormatUserNameFromApi(user *tgbotapi.User) string {
+	return FormatUserName(user.UserName, user.FirstName, user.LastName)
+}
+
+func FormatChatUserName(chatUser ChatUser) string {
+	return FormatUserName(chatUser.username, chatUser.userFirstName, chatUser.userLastName)
+}
 
 func FormatUserName(username string, firstName string, lastName string) string {
 	if len(username) > 0 {

@@ -222,14 +222,14 @@ func getEnabledChatUsersByChatId(chatId int64) []ChatUser {
 }
 
 func GetPidorListScoresByChatId(chatId int64) []ChatUser {
-	return getEnabledScoreListBChatId(chatId, `pidor_score`)
+	return getEnabledScoreListByChatId(chatId, `pidor_score`, `pidor_last_timestamp`)
 }
 
 func GetHeroListScoresByChatId(chatId int64) []ChatUser {
-	return getEnabledScoreListBChatId(chatId, `hero_score`)
+	return getEnabledScoreListByChatId(chatId, `hero_score`, `hero_last_timestamp`)
 }
 
-func getEnabledScoreListBChatId(chatId int64, orderedField string) []ChatUser {
+func getEnabledScoreListByChatId(chatId int64, scoreField string, timestampField string) []ChatUser {
 	stmt, err := DB.Prepare(`
 		SELECT user_id,
 			   username,
@@ -241,7 +241,7 @@ func getEnabledScoreListBChatId(chatId int64, orderedField string) []ChatUser {
 		       hero_last_timestamp
 		FROM chat_user
 		WHERE chat_id = ? AND enabled
-		ORDER BY ` + orderedField + ` DESC`)
+		ORDER BY ` + scoreField + ` DESC, ` + timestampField + ` DESC`)
 	if err != nil {
 		log.Fatal(err)
 	}

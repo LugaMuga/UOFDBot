@@ -16,10 +16,10 @@ type ChatUser struct {
 	heroLastTimestamp  int64
 }
 
-func (chatUser *ChatUser) fillFromMessage(message tgbotapi.Message) {
-	chatUser.chatId = message.Chat.ID
-	chatUser.userId = message.From.ID
-	chatUser.username = message.From.UserName
-	chatUser.userFirstName = message.From.FirstName
-	chatUser.userLastName = message.From.LastName
+func (chatUser *ChatUser) fill(chatId int64, user *tgbotapi.User) {
+	chatUser.chatId = chatId
+	chatUser.userId = user.ID
+	chatUser.username = user.UserName
+	chatUser.userFirstName = user.FirstName
+	chatUser.userLastName = user.LastName
 }

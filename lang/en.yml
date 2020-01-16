@@ -13,15 +13,15 @@ stat_reset:
 stat_not_reset:
   description: "Statistics not reset"
   other: "Statistics NOT reset!"
-yes:
+yes%:
   description: "Yes"
-  other: "Yes"
-no:
+  other: "Yes {{.a}}%"
+no%:
   description: "No"
-  other: "No"
+  other: "No {{.a}}%"
 a_u_sure:
   description: "Are you sure?"
-  other: "Are you sure?"
+  other: "Are you sure? (needs at least {{.a}}% for one of hte option)"
 at_least_one_user:
   description: "Needs at least one user"
   other: "Needs at least one user"
@@ -62,4 +62,4 @@ win_times:
   many: "{{.a}} times"
 results_by_game:
   description: "Results by game"
-  other: "Results {{.a}}"
+  other: "Results '{{.a}}'"

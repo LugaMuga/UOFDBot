@@ -4,6 +4,7 @@ import (
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"log"
 	"net/http"
+	"strings"
 )
 
 var bot *tgbotapi.BotAPI
@@ -63,7 +64,9 @@ func subscribeToUpdatesChan() {
 }
 
 func applyUpdate(update tgbotapi.Update) {
-	if update.Message != nil {
+	if update.Message != nil && update.Message.LeftChatMember != nil {
+		applyLeftChatMember(update)
+	} else if update.Message != nil {
 		applyCommand(update)
 	} else if update.CallbackQuery != nil {
 		applyCallbackQuery(update)
@@ -80,7 +83,7 @@ func applyCommand(update tgbotapi.Update) {
 		return
 	}
 
-	log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+	log.Printf("[%s] %s", FormatUserNameFromApi(update.Message.From), update.Message.Text)
 
 	message := update.Message
 	switch update.Message.Text {
@@ -92,7 +95,7 @@ func applyCommand(update tgbotapi.Update) {
 		register(*message)
 		break
 	case `/delete`, `/delete@` + config.BotName:
-		delete(*message)
+		delete(message.Chat.ID, message.From)
 		break
 	case `/run`, `/run@` + config.BotName:
 		run(message.Chat.ID)
@@ -107,7 +110,7 @@ func applyCommand(update tgbotapi.Update) {
 		pidorList(message.Chat.ID)
 		break
 	case `/resetpidor`, `/resetpidor@` + config.BotName:
-		resetApproval(message.Chat.ID, resetPidorApproval)
+		ResetApproval(message.Chat.ID, ResetPidorPoll)
 		break
 	case `/hero`, `/hero@` + config.BotName:
 		hero(message.Chat.ID)
@@ -116,7 +119,7 @@ func applyCommand(update tgbotapi.Update) {
 		heroList(message.Chat.ID)
 		break
 	case `/resethero`, `/resethero@` + config.BotName:
-		resetApproval(message.Chat.ID, resetHeroApproval)
+		ResetApproval(message.Chat.ID, ResetHeroPoll)
 		break
 	default:
 		break
@@ -127,22 +130,23 @@ func applyCallbackQuery(update tgbotapi.Update) {
 	if update.CallbackQuery == nil {
 		return
 	}
-
-	message := update.CallbackQuery.Message
-	switch update.CallbackQuery.Data {
-	case resetPidorApproval:
-		resetPidor(message.Chat.ID)
-		break
-	case resetHeroApproval:
-		resetHero(message.Chat.ID)
-		break
-	default:
-		msg := loc(defaultLang, `stat_not_reset`)
-		bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, msg))
-		SendMessage(message.Chat.ID, msg)
+	callbackQueryType := getCallbackQueryType(update.CallbackQuery.Data)
+	switch callbackQueryType {
+	case string(SimplePollType):
+		ResetPoll(update)
+		return
 	}
-	deleteKeyBoardMsg := tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID)
-	_, _ = bot.Send(deleteKeyBoardMsg)
+}
+
+func getCallbackQueryType(data string) string {
+	i := strings.Index(data, CallbackQueryParamDelimiter)
+	return data[0:i]
+}
+
+func applyLeftChatMember(update tgbotapi.Update) {
+	message := update.Message
+	log.Printf("[%s] left chat", FormatUserNameFromApi(update.Message.LeftChatMember))
+	delete(message.Chat.ID, message.LeftChatMember)
 }
 
 func SendMessage(chatID int64, text string) {
