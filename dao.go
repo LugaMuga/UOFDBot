@@ -3,7 +3,7 @@ package main
 import "log"
 
 func SaveOrUpdateChatUser(chatUser ChatUser) {
-	if chatUser.id == 0 {
+	if chatUser.Id == 0 {
 		InsertChatUser(chatUser)
 		return
 	}
@@ -28,12 +28,12 @@ func InsertChatUser(chatUser ChatUser) {
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(
-		chatUser.chatId,
-		chatUser.userId,
-		chatUser.username,
-		chatUser.userFirstName,
-		chatUser.userLastName,
-		chatUser.enabled)
+		chatUser.ChatId,
+		chatUser.UserId,
+		chatUser.Username,
+		chatUser.UserFirstName,
+		chatUser.UserLastName,
+		chatUser.Enabled)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,9 +51,9 @@ func UpdateChatUserStatus(chatUser ChatUser) {
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(
-		chatUser.enabled,
-		chatUser.chatId,
-		chatUser.userId)
+		chatUser.Enabled,
+		chatUser.ChatId,
+		chatUser.UserId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,11 +64,11 @@ func UpdateChatUserStatus(chatUser ChatUser) {
 }
 
 func UpdateChatUserPidorWins(chatUser ChatUser) {
-	updateChatUserScore(chatUser.id, chatUser.pidorScore, `pidor_score`, chatUser.pidorLastTimestamp, `pidor_last_timestamp`)
+	updateChatUserScore(chatUser.Id, chatUser.PidorScore, `pidor_score`, chatUser.PidorLastTimestamp, `pidor_last_timestamp`)
 }
 
 func UpdateChatUserHeroWins(chatUser ChatUser) {
-	updateChatUserScore(chatUser.id, chatUser.heroScore, `hero_score`, chatUser.heroLastTimestamp, `hero_last_timestamp`)
+	updateChatUserScore(chatUser.Id, chatUser.HeroScore, `hero_score`, chatUser.HeroLastTimestamp, `hero_last_timestamp`)
 }
 
 func updateChatUserScore(chatUserId int, score int, scoreField string, timestamp int64, timestampField string) {
@@ -120,17 +120,17 @@ func findChatUserByUserIdAndChatId(userId int, chatId int64) *ChatUser {
 	}
 	chatUser := new(ChatUser)
 	err = rows.Scan(
-		&chatUser.id,
-		&chatUser.chatId,
-		&chatUser.userId,
-		&chatUser.username,
-		&chatUser.userFirstName,
-		&chatUser.userLastName,
-		&chatUser.enabled,
-		&chatUser.pidorScore,
-		&chatUser.pidorLastTimestamp,
-		&chatUser.heroScore,
-		&chatUser.heroLastTimestamp)
+		&chatUser.Id,
+		&chatUser.ChatId,
+		&chatUser.UserId,
+		&chatUser.Username,
+		&chatUser.UserFirstName,
+		&chatUser.UserLastName,
+		&chatUser.Enabled,
+		&chatUser.PidorScore,
+		&chatUser.PidorLastTimestamp,
+		&chatUser.HeroScore,
+		&chatUser.HeroLastTimestamp)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -169,12 +169,12 @@ func findEnabledChatUserWonInGameIntervalByChatId(chatId int64, timestampField s
 	}
 	chatUser := new(ChatUser)
 	err = rows.Scan(
-		&chatUser.userId,
-		&chatUser.username,
-		&chatUser.userFirstName,
-		&chatUser.userLastName,
-		&chatUser.pidorScore,
-		&chatUser.heroScore)
+		&chatUser.UserId,
+		&chatUser.Username,
+		&chatUser.UserFirstName,
+		&chatUser.UserLastName,
+		&chatUser.PidorScore,
+		&chatUser.HeroScore)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -206,13 +206,13 @@ func getEnabledChatUsersByChatId(chatId int64) []ChatUser {
 	for rows.Next() {
 		chatUser := new(ChatUser)
 		err = rows.Scan(
-			&chatUser.id,
-			&chatUser.userId,
-			&chatUser.username,
-			&chatUser.userFirstName,
-			&chatUser.userLastName,
-			&chatUser.pidorScore,
-			&chatUser.heroScore)
+			&chatUser.Id,
+			&chatUser.UserId,
+			&chatUser.Username,
+			&chatUser.UserFirstName,
+			&chatUser.UserLastName,
+			&chatUser.PidorScore,
+			&chatUser.HeroScore)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -255,14 +255,14 @@ func getEnabledScoreListByChatId(chatId int64, scoreField string, timestampField
 	for rows.Next() {
 		chatUser := new(ChatUser)
 		err = rows.Scan(
-			&chatUser.userId,
-			&chatUser.username,
-			&chatUser.userFirstName,
-			&chatUser.userLastName,
-			&chatUser.pidorScore,
-			&chatUser.pidorLastTimestamp,
-			&chatUser.heroScore,
-			&chatUser.heroLastTimestamp)
+			&chatUser.UserId,
+			&chatUser.Username,
+			&chatUser.UserFirstName,
+			&chatUser.UserLastName,
+			&chatUser.PidorScore,
+			&chatUser.PidorLastTimestamp,
+			&chatUser.HeroScore,
+			&chatUser.HeroLastTimestamp)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -1,28 +1,30 @@
 package main
 
 import (
+	"crypto/rand"
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
-	"math/rand"
-	"time"
+	"math/big"
 )
 
 type CallbackQueryType string
+
 const SimplePollType CallbackQueryType = `SIMPLE_POLL`
 const CallbackQueryParamDelimiter = `||`
 
-func play(chatUsers []ChatUser) int {
+func play(chatUsers []ChatUser) int64 {
 	if len(chatUsers) <= 0 {
 		return -1
 	} else {
-		rand.Seed(time.Now().UnixNano())
-		return rand.Intn(len(chatUsers))
+		numberOfChatUsers := int64(len(chatUsers))
+		r, _ := rand.Int(rand.Reader, big.NewInt(numberOfChatUsers))
+		return r.Int64()
 	}
 }
 
 func register(message tgbotapi.Message) {
 	chatUser := findChatUserByUserIdAndChatId(message.From.ID, message.Chat.ID)
 	username := FormatUserName(message.From.UserName, message.From.FirstName, message.From.LastName)
-	if chatUser != nil && chatUser.enabled {
+	if chatUser != nil && chatUser.Enabled {
 		SendMessage(message.Chat.ID, loc(defaultLang, `user_already_registered`, username))
 		return
 	}
@@ -30,7 +32,7 @@ func register(message tgbotapi.Message) {
 		chatUser = new(ChatUser)
 	}
 	chatUser.fill(message.Chat.ID, message.From)
-	chatUser.enabled = true
+	chatUser.Enabled = true
 	SaveOrUpdateChatUser(*chatUser)
 	SendMessage(message.Chat.ID, loc(defaultLang, `user_registered`, username))
 }
@@ -38,12 +40,12 @@ func register(message tgbotapi.Message) {
 func delete(chatId int64, user *tgbotapi.User) {
 	chatUser := findChatUserByUserIdAndChatId(user.ID, chatId)
 	username := FormatUserName(user.UserName, user.FirstName, user.LastName)
-	if chatUser == nil || !chatUser.enabled {
+	if chatUser == nil || !chatUser.Enabled {
 		SendMessage(chatId, loc(defaultLang, `user_not_participating`, username))
 		return
 	}
 	chatUser.fill(chatId, user)
-	chatUser.enabled = false
+	chatUser.Enabled = false
 	UpdateChatUserStatus(*chatUser)
 	SendMessage(chatId, loc(defaultLang, `user_deleted`, username))
 }
@@ -61,8 +63,8 @@ func pidor(chatId int64) {
 		SendMessage(chatId, loc(defaultLang, `at_least_one_user`))
 		return
 	}
-	chatUsers[winnerIndex].pidorScore += 1
-	chatUsers[winnerIndex].pidorLastTimestamp = nowUnix()
+	chatUsers[winnerIndex].PidorScore += 1
+	chatUsers[winnerIndex].PidorLastTimestamp = nowUnix()
 	UpdateChatUserPidorWins(chatUsers[winnerIndex])
 	msg := FormatPidorWinner(chatUsers[winnerIndex])
 	SendMessage(chatId, msg)
@@ -94,8 +96,8 @@ func hero(chatId int64) {
 		SendMessage(chatId, loc(defaultLang, `at_least_one_user`))
 		return
 	}
-	chatUsers[winnerIndex].heroScore += 1
-	chatUsers[winnerIndex].heroLastTimestamp = nowUnix()
+	chatUsers[winnerIndex].HeroScore += 1
+	chatUsers[winnerIndex].HeroLastTimestamp = nowUnix()
 	UpdateChatUserHeroWins(chatUsers[winnerIndex])
 	msg := FormatHeroWinner(chatUsers[winnerIndex])
 	SendMessage(chatId, msg)

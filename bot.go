@@ -1,8 +1,10 @@
 package main
 
 import (
+	cryptoRand "crypto/rand"
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"log"
+	"math/big"
 	"net/http"
 	"strings"
 )
@@ -10,16 +12,20 @@ import (
 var bot *tgbotapi.BotAPI
 
 func main() {
-	LoadConfig()
-	LoadI18N()
-	InitDb()
-	registerBot()
-	if config.ConnectionType == ConnectionTypeWebhook {
-		subscribeWithWebhook()
-	} else {
-		subscribeToUpdatesChan()
+	for i:=0; i < 10; i++ {
+		r, _ := cryptoRand.Int(cryptoRand.Reader, big.NewInt(int64(5)))
+		println(r.Int64())
 	}
-	defer CloseDb()
+	//LoadConfig()
+	//LoadI18N()
+	//InitDb()
+	//registerBot()
+	//if config.ConnectionType == ConnectionTypeWebhook {
+	//	subscribeWithWebhook()
+	//} else {
+	//	subscribeToUpdatesChan()
+	//}
+	//defer CloseDb()
 }
 
 func registerBot() {
