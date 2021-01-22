@@ -79,7 +79,7 @@ func splitUsers(optionParam string) []string {
 	return users
 }
 
-func buildSimplePollButtonData(resetPoll *SimplePoll, option string) string {
+func buildSimplePollButtonData(resetPoll *SimplePoll, option string, chatCallback *ChatCallback) string {
 	var sb strings.Builder
 	sb.WriteString(string(SimplePollType))
 	sb.WriteString(CallbackQueryParamDelimiter)
@@ -87,9 +87,12 @@ func buildSimplePollButtonData(resetPoll *SimplePoll, option string) string {
 	sb.WriteString(CallbackQueryParamDelimiter)
 	sb.WriteString(option)
 	sb.WriteString(CallbackQueryParamDelimiter)
-	sb.WriteString(joinUsers(resetPoll.agreedUsers))
-	sb.WriteString(CallbackQueryParamDelimiter)
-	sb.WriteString(joinUsers(resetPoll.disagreedUsers))
+	var text strings.Builder
+	text.WriteString(joinUsers(resetPoll.agreedUsers))
+	text.WriteString(CallbackQueryParamDelimiter)
+	text.WriteString(joinUsers(resetPoll.disagreedUsers))
+	chatCallback.Text = text.String()
+	sb.WriteString(strconv.FormatInt(chatCallback.Id, 10))
 	return sb.String()
 }
 
@@ -98,9 +101,12 @@ func ParseSimplePollCallbackQuery(query *tgbotapi.CallbackQuery) *SimplePoll {
 	simplePoll.text = query.Message.Text
 	callbackData := query.Data
 	params := strings.Split(callbackData, CallbackQueryParamDelimiter)
+	id, _ := strconv.Atoi(params[3])
+	callback := getChatCallbackById(id)
+	userParams := strings.Split(callback.Text, CallbackQueryParamDelimiter)
 	simplePoll.name = params[1]
 	simplePoll.selectedOption = params[2]
-	simplePoll.agreedUsers = splitUsers(params[3])
-	simplePoll.disagreedUsers = splitUsers(params[4])
+	simplePoll.agreedUsers = splitUsers(userParams[0])
+	simplePoll.disagreedUsers = splitUsers(userParams[1])
 	return simplePoll
 }
