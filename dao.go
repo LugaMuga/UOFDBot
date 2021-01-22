@@ -10,6 +10,14 @@ func SaveOrUpdateChatUser(chatUser ChatUser) {
 	UpdateChatUserStatus(chatUser)
 }
 
+func SaveOrUpdateChatCallback(chatCallback ChatCallback) int64 {
+	if chatCallback.Id == 0 {
+		return InsertChatCallback(chatCallback)
+	}
+	UpdateChatCallbackText(chatCallback)
+	return chatCallback.Id
+}
+
 func InsertChatUser(chatUser ChatUser) {
 	tx, err := DB.Begin()
 	if err != nil {
@@ -38,6 +46,78 @@ func InsertChatUser(chatUser ChatUser) {
 		log.Fatal(err)
 	}
 	tx.Commit()
+}
+
+func InsertChatCallback(chatCallback ChatCallback) int64 {
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stmt, err := tx.Prepare(`INSERT INTO chat_callback(
+                 chat_id,
+                 text,
+                 create_timestamp)
+                 values(?, ?, ?)`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(
+		chatCallback.ChatId,
+		chatCallback.Text,
+		chatCallback.CreateTimestamp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tx.Commit()
+	id, err := res.LastInsertId()
+	return id
+}
+
+func UpdateChatCallbackText(chatCallback ChatCallback) {
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stmt, err := tx.Prepare(`UPDATE chat_callback SET text = ? WHERE chat_id = ? AND id = ?`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(
+		chatCallback.Text,
+		chatCallback.ChatId,
+		chatCallback.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func DeleteChatCallback(id int64, chatId int64) {
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stmt, err := tx.Prepare(`DELETE FROM chat_callback WHERE id = ? and chat_id = ?`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(
+		id,
+		chatId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func UpdateChatUserStatus(chatUser ChatUser) {
@@ -219,6 +299,38 @@ func getEnabledChatUsersByChatId(chatId int64) []ChatUser {
 		chatUsers = append(chatUsers, *chatUser)
 	}
 	return chatUsers
+}
+
+func getChatCallbackById(id int) *ChatCallback {
+	stmt, err := DB.Prepare(`
+		SELECT id,
+			   chat_id,
+			   text,
+			   create_timestamp
+		FROM chat_callback
+		WHERE id = ?`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	if !rows.Next() {
+		return nil
+	}
+	chatCallback := new(ChatCallback)
+	err = rows.Scan(
+		&chatCallback.Id,
+		&chatCallback.ChatId,
+		&chatCallback.Text,
+		&chatCallback.CreateTimestamp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return chatCallback
 }
 
 func GetPidorListScoresByChatId(chatId int64) []ChatUser {

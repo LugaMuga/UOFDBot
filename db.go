@@ -32,6 +32,12 @@ func Migrate() {
 		hero_score INTEGER DEFAULT 0,
 		hero_last_timestamp INTEGER DEFAULT 0                         
 	);
+	CREATE TABLE IF NOT EXISTS chat_callback (
+    	id               INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    	chat_id          INTEGER,
+    	text             TEXT,
+    	create_timestamp INTEGER DEFAULT 0
+    );
 	`
 	_, err := DB.Exec(migrationsStmt)
 	if err != nil {
