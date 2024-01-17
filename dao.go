@@ -48,6 +48,36 @@ func InsertChatUser(chatUser ChatUser) {
 	tx.Commit()
 }
 
+func UpdateChatUser(chatUser ChatUser) {
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stmt, err := tx.Prepare(`UPDATE chat_user
+				SET
+					username = ?,
+					user_first_name = ?,
+					user_last_name = ?,
+					enabled = ?
+				WHERE
+					chat_id = ? AND user_id = ?`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(
+		chatUser.Username,
+		chatUser.UserFirstName,
+		chatUser.UserLastName,
+		chatUser.Enabled,
+		chatUser.ChatId,
+		chatUser.UserId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tx.Commit()
+}
+
 func InsertChatCallback(chatCallback ChatCallback) int64 {
 	tx, err := DB.Begin()
 	if err != nil {

@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	"log"
 	"math/big"
 )
 
@@ -68,6 +69,32 @@ func pidor(chatId int64) {
 	UpdateChatUserPidorWins(chatUsers[winnerIndex])
 	msg := FormatPidorWinner(chatUsers[winnerIndex])
 	SendMessage(chatId, msg)
+}
+
+func updateUsers(chatId int64) {
+	chatUsers := getEnabledChatUsersByChatId(chatId)
+	for _, value := range chatUsers {
+		chatConfig := tgbotapi.ChatConfigWithUser{
+			ChatID: chatId,
+			UserID: value.UserId,
+		}
+		updateUser(chatId, chatConfig, value)
+	}
+	msg := FormatPidorWinner(chatUsers[1])
+	SendMessage(chatId, msg)
+}
+
+func updateUser(chatId int64, chatConfig tgbotapi.ChatConfigWithUser, user ChatUser) {
+	userTemp, err := bot.GetChatMember(chatConfig)
+	if err != nil {
+		log.Printf("user not found %d", chatConfig.UserID)
+		return
+	}
+	if user.Username != userTemp.User.UserName {
+		user.Username = userTemp.User.UserName
+		user.ChatId = chatId
+		UpdateChatUser(user)
+	}
 }
 
 func pidorList(chatId int64) {
