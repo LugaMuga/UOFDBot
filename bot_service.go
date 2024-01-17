@@ -80,7 +80,7 @@ func updateUsers(chatId int64) {
 		}
 		updateUser(chatId, chatConfig, value)
 	}
-	msg := FormatPidorWinner(chatUsers[1])
+	msg := loc(defaultLang, `update_users`)
 	SendMessage(chatId, msg)
 }
 
