@@ -121,6 +121,9 @@ func applyCommand(update tgbotapi.Update) {
 	case `/resethero`, `/resethero@` + config.BotName:
 		ResetApproval(message.Chat.ID, ResetHeroPoll)
 		break
+	case `/update`, `/update@` + config.BotName:
+		updateUsers(message.Chat.ID)
+		break
 	default:
 		break
 	}

@@ -63,3 +63,6 @@ win_times:
 results_by_game:
   description: "Results by game"
   other: "Итоги '{{.a}}'"
+update_users:
+  description: "Users updated successfully"
+  other: "Обновление пользователей прошло успешно"
