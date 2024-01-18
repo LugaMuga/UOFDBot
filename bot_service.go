@@ -87,13 +87,13 @@ func updateUsers(chatId int64) {
 func updateUser(chatId int64, chatConfig tgbotapi.ChatConfigWithUser, user ChatUser) {
 	userTemp, err := bot.GetChatMember(chatConfig)
 	if err != nil {
-		log.Printf("user not found %d", chatConfig.UserID)
+		log.Printf("user not found userId: %d, chatId: %d, err: %q", chatConfig.UserID, chatId, err)
 		return
 	}
 	if user.Username != userTemp.User.UserName {
 		user.Username = userTemp.User.UserName
 		user.ChatId = chatId
-		UpdateChatUser(user)
+		UpdateChatUserUsername(user)
 	}
 }
 
