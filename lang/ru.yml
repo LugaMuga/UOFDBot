@@ -65,4 +65,4 @@ results_by_game:
   other: "Итоги '{{.a}}'"
 update_users:
   description: "Users updated successfully"
-  other: "Обновление пользователей прошло успешно"
+  other: "Обновление пользователей, давших доступ боту, прошло успешно"
