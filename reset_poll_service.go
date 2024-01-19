@@ -32,6 +32,7 @@ func ResetPoll(update tgbotapi.Update) {
 	activeChatUsers := getEnabledChatUsersByChatId(message.Chat.ID)
 	var activeUsernames []string
 	for _, activeChatUser := range activeChatUsers {
+		checkAndUpdateUserIfNeeded(&activeChatUser, update.CallbackQuery.From, message.Chat.ID)
 		activeUsernames = append(activeUsernames, FormatChatUserName(activeChatUser))
 	}
 
@@ -51,6 +52,20 @@ func ResetPoll(update tgbotapi.Update) {
 	editedMarkup := buildResetPollMarkup(poll, callbackDataDb)
 	editedMsg := tgbotapi.NewEditMessageReplyMarkup(message.Chat.ID, message.MessageID, editedMarkup)
 	_, _ = bot.Send(editedMsg)
+}
+
+func checkAndUpdateUserIfNeeded(activeChatUser *ChatUser, from *tgbotapi.User, chatId int64) {
+	if activeChatUser.UserId != from.ID ||
+		(activeChatUser.Username == from.UserName &&
+			activeChatUser.UserFirstName == from.FirstName &&
+			activeChatUser.UserLastName == from.LastName) {
+		return
+	}
+	activeChatUser.Username = from.UserName
+	activeChatUser.UserFirstName = from.FirstName
+	activeChatUser.UserLastName = from.LastName
+	activeChatUser.ChatId = chatId
+	UpdateChatUserUsernameFirstAndLastName(activeChatUser)
 }
 
 func calcPercentage(part int, full int) int {
