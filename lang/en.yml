@@ -65,4 +65,4 @@ results_by_game:
   other: "Results '{{.a}}'"
 update_users:
   description: "Users updated successfully"
-  other: "Users updated successfully"
+  other: "Users that gave access updated successfully"
