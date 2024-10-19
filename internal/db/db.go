@@ -1,16 +1,27 @@
-package main
+package db
 
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"os"
+	"path/filepath"
 )
 
 var DB *sql.DB
 
 func InitDb() {
 	var err error
-	DB, err = sql.Open(`sqlite3`, config.DbPath)
+	dbFilePath := os.Getenv("UOFD_DB_FILE_PATH")
+	if dbFilePath == "" {
+		workDir, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		dbFilePath = filepath.Dir(workDir) + "/uofd.db"
+	}
+
+	DB, err = sql.Open(`sqlite3`, dbFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}

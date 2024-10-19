@@ -1,4 +1,4 @@
-package main
+package models
 
 import tgbotapi "github.com/Syfaro/telegram-bot-api"
 
@@ -16,7 +16,7 @@ type ChatUser struct {
 	HeroLastTimestamp  int64
 }
 
-func (chatUser *ChatUser) fill(chatId int64, user *tgbotapi.User) {
+func (chatUser *ChatUser) Fill(chatId int64, user *tgbotapi.User) {
 	chatUser.ChatId = chatId
 	chatUser.UserId = user.ID
 	chatUser.Username = user.UserName

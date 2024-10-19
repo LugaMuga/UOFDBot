@@ -1,16 +1,17 @@
-package main
+package config
 
 import (
 	"github.com/goccy/go-yaml"
-	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 )
 
-const ConfigFile string = `./config.yml`
+const ConfigFilePath string = `/UOFDBot/configs/config.yml`
 const ConnectionTypeChannel string = `CHANNEL`
 const ConnectionTypeWebhook string = `WEBHOOK`
 
-var config struct {
+var Config struct {
 	BotName               string `yaml:"bot_name"`
 	BotToken              string `yaml:"bot_token"`
 	BotTimeout            int    `yaml:"bot_timeout"`
@@ -18,7 +19,6 @@ var config struct {
 	BotDefaultLanguage    string `yaml:"bot_default_language"`
 	BotResetMinPercentage int    `yaml:"bot_reset_min_percantage"`
 	ConnectionType        string `yaml:"connection_type"`
-	DbPath                string `yaml:"db_path"`
 	WebhookHost           string `yaml:"webhook_host"`
 	WebhookPort           string `yaml:"webhook_port"`
 	WebhookCertPath       string `yaml:"webhook_cert_path"`
@@ -27,11 +27,19 @@ var config struct {
 }
 
 func LoadConfig() {
-	file, err := ioutil.ReadFile(ConfigFile)
+	configPath := os.Getenv("UOFD_CONFIG_FILE_PATH")
+	if configPath == "" {
+		workDir, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		configPath = filepath.Dir(workDir) + ConfigFilePath
+	}
+	file, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = yaml.Unmarshal(file, &config)
+	err = yaml.Unmarshal(file, &Config)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,30 +1,42 @@
-package main
+package locale
 
 import (
+	"github.com/LugaMuga/UOFDBot/internal/config"
 	"github.com/goccy/go-yaml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 	"log"
+	"os"
+	"path/filepath"
 )
 
-const russianLangFile = `./lang/ru.yml`
-const englishLangFile = `./lang/en.yml`
+const russianLangFile = `ru.yml`
+const englishLangFile = `en.yml`
 
 var i18nBundle *i18n.Bundle
-var defaultLang language.Tag
+var DefaultLang language.Tag
 var ruLocalizer *i18n.Localizer
 var enLocalizer *i18n.Localizer
 
 func LoadI18N() {
 	var err error
-	defaultLang, err = language.Parse(config.BotDefaultLanguage)
+	DefaultLang, err = language.Parse(config.Config.BotDefaultLanguage)
 	if err != nil {
 		log.Fatal(err)
 	}
-	i18nBundle = i18n.NewBundle(defaultLang)
+	i18nBundle = i18n.NewBundle(DefaultLang)
 	i18nBundle.RegisterUnmarshalFunc("yml", yaml.Unmarshal)
-	i18nBundle.MustLoadMessageFile(russianLangFile)
-	i18nBundle.MustLoadMessageFile(englishLangFile)
+	langDirPath := os.Getenv("UOFD_LANG_DIR_PATH")
+	if langDirPath == "" {
+		workDir, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		langDirPath = filepath.Dir(workDir) + "/UOFDBot/lang"
+	}
+	i18nBundle.MustLoadMessageFile(langDirPath + "/" + russianLangFile)
+	i18nBundle.MustLoadMessageFile(langDirPath + "/" + englishLangFile)
+	log.Println(`Locales successfully loaded!`)
 
 	ruLocalizer = i18n.NewLocalizer(i18nBundle, language.Russian.String())
 	enLocalizer = i18n.NewLocalizer(i18nBundle, language.English.String())
@@ -41,7 +53,7 @@ func getLocalizer(languageTag language.Tag) *i18n.Localizer {
 	}
 }
 
-func loc(languageTag language.Tag, messageId string, args ...interface{}) string {
+func Loc(languageTag language.Tag, messageId string, args ...interface{}) string {
 	localizer := getLocalizer(languageTag)
 	data := make(map[string]interface{})
 	for index, arg := range args {
@@ -54,7 +66,7 @@ func loc(languageTag language.Tag, messageId string, args ...interface{}) string
 	return msg
 }
 
-func locPlural(languageTag language.Tag, messageId string, pluralVal interface{}, args ...interface{}) string {
+func LocPlural(languageTag language.Tag, messageId string, pluralVal interface{}, args ...interface{}) string {
 	localizer := getLocalizer(languageTag)
 	data := make(map[string]interface{})
 	for index, arg := range args {

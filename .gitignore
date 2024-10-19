@@ -19,3 +19,4 @@
 
 *backup
 *.db
+/prod-config.yml

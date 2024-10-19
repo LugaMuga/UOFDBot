@@ -1,11 +1,11 @@
-package main
+package utils
 
 import "time"
 
-func nowUnix() int64 {
+func NowUnix() int64 {
 	return time.Now().Unix()
 }
 
-func getLastMidnight() int64 {
+func GetLastMidnight() int64 {
 	return time.Now().Truncate(24 * time.Hour).Unix()
 }

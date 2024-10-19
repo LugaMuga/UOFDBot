@@ -5,7 +5,6 @@ bot_time_layout: 2006-01-02 15:04:05
 bot_default_language: ru
 bot_reset_min_percantage: 60
 connection_type: CHANNEL # CHANNEL or WEBHOOK
-db_path: ./uofd.db
 webhook_host: 192.168.0.1
 webhook_port: 8443
 webhook_cert_path: cert.pem

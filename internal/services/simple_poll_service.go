@@ -1,6 +1,10 @@
-package main
+package services
 
 import (
+	"github.com/LugaMuga/UOFDBot/internal/dao"
+	"github.com/LugaMuga/UOFDBot/internal/locale"
+	"github.com/LugaMuga/UOFDBot/internal/models"
+	"github.com/LugaMuga/UOFDBot/internal/utils"
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"strconv"
 	"strings"
@@ -9,9 +13,9 @@ import (
 const SimplePollUserDelimiter = `|`
 
 /*
- Protocol description
- SIMPLE_POLL||RESET_PIDOR||yes||@michael|@mike...||@jimm|@jack...
- CallbackQueryType||ResetPidorPoll||ResetPollAgreedOption||agreedUser|agreedUser...||disagreedUser|disagreedUser...
+Protocol description
+SIMPLE_POLL||RESET_PIDOR||yes||@michael|@mike...||@jimm|@jack...
+CallbackQueryType||ResetPidorPoll||ResetPollAgreedOption||agreedUser|agreedUser...||disagreedUser|disagreedUser...
 */
 type SimplePoll struct {
 	name           string
@@ -31,8 +35,8 @@ func NewSimplePoll(pollName string) *SimplePoll {
 }
 
 func (simplePoll *SimplePoll) updateButtonsText(agreedPercentage int, disagreedPercentage int) {
-	simplePoll.agreedText = loc(defaultLang, `yes%`, strconv.Itoa(agreedPercentage))
-	simplePoll.disagreedText = loc(defaultLang, `no%`, strconv.Itoa(disagreedPercentage))
+	simplePoll.agreedText = locale.Loc(locale.DefaultLang, `yes%`, strconv.Itoa(agreedPercentage))
+	simplePoll.disagreedText = locale.Loc(locale.DefaultLang, `no%`, strconv.Itoa(disagreedPercentage))
 	if len(simplePoll.agreedUsers) > 0 {
 		simplePoll.agreedText += ` [` + joinUsers(simplePoll.agreedUsers) + `]`
 	}
@@ -42,7 +46,7 @@ func (simplePoll *SimplePoll) updateButtonsText(agreedPercentage int, disagreedP
 }
 
 func (simplePoll *SimplePoll) applySelectedOption(user *tgbotapi.User, agreedOption string, disagreedOption string) {
-	username := FormatUserNameFromApi(user)
+	username := utils.FormatUserNameFromApi(user)
 	if simplePoll.selectedOption == agreedOption {
 		updateUserArrays(username, &simplePoll.agreedUsers, &simplePoll.disagreedUsers)
 	} else if simplePoll.selectedOption == disagreedOption {
@@ -51,17 +55,17 @@ func (simplePoll *SimplePoll) applySelectedOption(user *tgbotapi.User, agreedOpt
 }
 
 func updateUserArrays(username string, firstUsers *[]string, secondUsers *[]string) {
-	if !contains(*firstUsers, username) {
+	if !utils.Contains(*firstUsers, username) {
 		*firstUsers = append(*firstUsers, username)
 	}
-	if i := indexOf(*secondUsers, username); i >= 0 {
-		*secondUsers = remove(*secondUsers, i)
+	if i := utils.IndexOf(*secondUsers, username); i >= 0 {
+		*secondUsers = utils.Remove(*secondUsers, i)
 	}
 }
 
 func (simplePoll *SimplePoll) improveVotedUserArrays(activeUsernames []string) {
-	retainAll(&simplePoll.agreedUsers, activeUsernames)
-	retainAll(&simplePoll.disagreedUsers, activeUsernames)
+	utils.RetainAll(&simplePoll.agreedUsers, activeUsernames)
+	utils.RetainAll(&simplePoll.disagreedUsers, activeUsernames)
 }
 
 func joinUsers(users []string) string {
@@ -79,7 +83,7 @@ func splitUsers(optionParam string) []string {
 	return users
 }
 
-func buildSimplePollButtonData(resetPoll *SimplePoll, option string, chatCallback *ChatCallback) string {
+func buildSimplePollButtonData(resetPoll *SimplePoll, option string, chatCallback *models.ChatCallback) string {
 	var sb strings.Builder
 	sb.WriteString(string(SimplePollType))
 	sb.WriteString(CallbackQueryParamDelimiter)
@@ -102,7 +106,7 @@ func ParseSimplePollCallbackQuery(query *tgbotapi.CallbackQuery) *SimplePoll {
 	callbackData := query.Data
 	params := strings.Split(callbackData, CallbackQueryParamDelimiter)
 	id, _ := strconv.Atoi(params[3])
-	callback := getChatCallbackById(id)
+	callback := dao.GetChatCallbackById(id)
 	userParams := strings.Split(callback.Text, CallbackQueryParamDelimiter)
 	simplePoll.name = params[1]
 	simplePoll.selectedOption = params[2]

@@ -1,8 +1,13 @@
-package main
+package dao
 
-import "log"
+import (
+	"github.com/LugaMuga/UOFDBot/internal/db"
+	"github.com/LugaMuga/UOFDBot/internal/models"
+	"github.com/LugaMuga/UOFDBot/internal/utils"
+	"log"
+)
 
-func SaveOrUpdateChatUser(chatUser ChatUser) {
+func SaveOrUpdateChatUser(chatUser models.ChatUser) {
 	if chatUser.Id == 0 {
 		InsertChatUser(chatUser)
 		return
@@ -10,7 +15,7 @@ func SaveOrUpdateChatUser(chatUser ChatUser) {
 	UpdateChatUserStatus(chatUser)
 }
 
-func SaveOrUpdateChatCallback(chatCallback ChatCallback) int64 {
+func SaveOrUpdateChatCallback(chatCallback models.ChatCallback) int64 {
 	if chatCallback.Id == 0 {
 		return InsertChatCallback(chatCallback)
 	}
@@ -18,8 +23,8 @@ func SaveOrUpdateChatCallback(chatCallback ChatCallback) int64 {
 	return chatCallback.Id
 }
 
-func InsertChatUser(chatUser ChatUser) {
-	tx, err := DB.Begin()
+func InsertChatUser(chatUser models.ChatUser) {
+	tx, err := db.DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,8 +53,8 @@ func InsertChatUser(chatUser ChatUser) {
 	tx.Commit()
 }
 
-func UpdateChatUserUsernameFirstAndLastName(chatUser *ChatUser) {
-	tx, err := DB.Begin()
+func UpdateChatUserUsernameFirstAndLastName(chatUser *models.ChatUser) {
+	tx, err := db.DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,8 +81,8 @@ func UpdateChatUserUsernameFirstAndLastName(chatUser *ChatUser) {
 	tx.Commit()
 }
 
-func UpdateChatUserUsername(chatUser ChatUser) {
-	tx, err := DB.Begin()
+func UpdateChatUserUsername(chatUser models.ChatUser) {
+	tx, err := db.DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,8 +105,8 @@ func UpdateChatUserUsername(chatUser ChatUser) {
 	tx.Commit()
 }
 
-func InsertChatCallback(chatCallback ChatCallback) int64 {
-	tx, err := DB.Begin()
+func InsertChatCallback(chatCallback models.ChatCallback) int64 {
+	tx, err := db.DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -127,8 +132,8 @@ func InsertChatCallback(chatCallback ChatCallback) int64 {
 	return id
 }
 
-func UpdateChatCallbackText(chatCallback ChatCallback) {
-	tx, err := DB.Begin()
+func UpdateChatCallbackText(chatCallback models.ChatCallback) {
+	tx, err := db.DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -151,7 +156,7 @@ func UpdateChatCallbackText(chatCallback ChatCallback) {
 }
 
 func DeleteChatCallback(id int64, chatId int64) {
-	tx, err := DB.Begin()
+	tx, err := db.DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -172,8 +177,8 @@ func DeleteChatCallback(id int64, chatId int64) {
 	}
 }
 
-func UpdateChatUserStatus(chatUser ChatUser) {
-	tx, err := DB.Begin()
+func UpdateChatUserStatus(chatUser models.ChatUser) {
+	tx, err := db.DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -195,16 +200,16 @@ func UpdateChatUserStatus(chatUser ChatUser) {
 	}
 }
 
-func UpdateChatUserPidorWins(chatUser ChatUser) {
+func UpdateChatUserPidorWins(chatUser models.ChatUser) {
 	updateChatUserScore(chatUser.Id, chatUser.PidorScore, `pidor_score`, chatUser.PidorLastTimestamp, `pidor_last_timestamp`)
 }
 
-func UpdateChatUserHeroWins(chatUser ChatUser) {
+func UpdateChatUserHeroWins(chatUser models.ChatUser) {
 	updateChatUserScore(chatUser.Id, chatUser.HeroScore, `hero_score`, chatUser.HeroLastTimestamp, `hero_last_timestamp`)
 }
 
 func updateChatUserScore(chatUserId int, score int, scoreField string, timestamp int64, timestampField string) {
-	tx, err := DB.Begin()
+	tx, err := db.DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -223,8 +228,8 @@ func updateChatUserScore(chatUserId int, score int, scoreField string, timestamp
 	}
 }
 
-func findChatUserByUserIdAndChatId(userId int, chatId int64) *ChatUser {
-	stmt, err := DB.Prepare(`
+func FindChatUserByUserIdAndChatId(userId int, chatId int64) *models.ChatUser {
+	stmt, err := db.DB.Prepare(`
 		SELECT 	id,
 		       	chat_id,
 				user_id,
@@ -250,7 +255,7 @@ func findChatUserByUserIdAndChatId(userId int, chatId int64) *ChatUser {
 	if !rows.Next() {
 		return nil
 	}
-	chatUser := new(ChatUser)
+	chatUser := new(models.ChatUser)
 	err = rows.Scan(
 		&chatUser.Id,
 		&chatUser.ChatId,
@@ -269,16 +274,16 @@ func findChatUserByUserIdAndChatId(userId int, chatId int64) *ChatUser {
 	return chatUser
 }
 
-func FindActivePidorByChatId(chatId int64) *ChatUser {
+func FindActivePidorByChatId(chatId int64) *models.ChatUser {
 	return findEnabledChatUserWonInGameIntervalByChatId(chatId, `pidor_last_timestamp`)
 }
 
-func FindActiveHeroByChatId(chatId int64) *ChatUser {
+func FindActiveHeroByChatId(chatId int64) *models.ChatUser {
 	return findEnabledChatUserWonInGameIntervalByChatId(chatId, `hero_last_timestamp`)
 }
 
-func findEnabledChatUserWonInGameIntervalByChatId(chatId int64, timestampField string) *ChatUser {
-	stmt, err := DB.Prepare(`
+func findEnabledChatUserWonInGameIntervalByChatId(chatId int64, timestampField string) *models.ChatUser {
+	stmt, err := db.DB.Prepare(`
 		SELECT user_id,
 			   username,
 			   user_first_name,
@@ -291,7 +296,7 @@ func findEnabledChatUserWonInGameIntervalByChatId(chatId int64, timestampField s
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	rows, err := stmt.Query(chatId, getLastMidnight())
+	rows, err := stmt.Query(chatId, utils.GetLastMidnight())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -299,7 +304,7 @@ func findEnabledChatUserWonInGameIntervalByChatId(chatId int64, timestampField s
 	if !rows.Next() {
 		return nil
 	}
-	chatUser := new(ChatUser)
+	chatUser := new(models.ChatUser)
 	err = rows.Scan(
 		&chatUser.UserId,
 		&chatUser.Username,
@@ -313,8 +318,8 @@ func findEnabledChatUserWonInGameIntervalByChatId(chatId int64, timestampField s
 	return chatUser
 }
 
-func getEnabledChatUsersByChatId(chatId int64) []ChatUser {
-	stmt, err := DB.Prepare(`
+func GetEnabledChatUsersByChatId(chatId int64) []models.ChatUser {
+	stmt, err := db.DB.Prepare(`
 		SELECT id,
 			   user_id,
 			   username,
@@ -334,9 +339,9 @@ func getEnabledChatUsersByChatId(chatId int64) []ChatUser {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	var chatUsers []ChatUser
+	var chatUsers []models.ChatUser
 	for rows.Next() {
-		chatUser := new(ChatUser)
+		chatUser := new(models.ChatUser)
 		err = rows.Scan(
 			&chatUser.Id,
 			&chatUser.UserId,
@@ -353,8 +358,8 @@ func getEnabledChatUsersByChatId(chatId int64) []ChatUser {
 	return chatUsers
 }
 
-func getChatCallbackById(id int) *ChatCallback {
-	stmt, err := DB.Prepare(`
+func GetChatCallbackById(id int) *models.ChatCallback {
+	stmt, err := db.DB.Prepare(`
 		SELECT id,
 			   chat_id,
 			   text,
@@ -373,7 +378,7 @@ func getChatCallbackById(id int) *ChatCallback {
 	if !rows.Next() {
 		return nil
 	}
-	chatCallback := new(ChatCallback)
+	chatCallback := new(models.ChatCallback)
 	err = rows.Scan(
 		&chatCallback.Id,
 		&chatCallback.ChatId,
@@ -385,16 +390,16 @@ func getChatCallbackById(id int) *ChatCallback {
 	return chatCallback
 }
 
-func GetPidorListScoresByChatId(chatId int64) []ChatUser {
+func GetPidorListScoresByChatId(chatId int64) []models.ChatUser {
 	return getEnabledScoreListByChatId(chatId, `pidor_score`, `pidor_last_timestamp`)
 }
 
-func GetHeroListScoresByChatId(chatId int64) []ChatUser {
+func GetHeroListScoresByChatId(chatId int64) []models.ChatUser {
 	return getEnabledScoreListByChatId(chatId, `hero_score`, `hero_last_timestamp`)
 }
 
-func getEnabledScoreListByChatId(chatId int64, scoreField string, timestampField string) []ChatUser {
-	stmt, err := DB.Prepare(`
+func getEnabledScoreListByChatId(chatId int64, scoreField string, timestampField string) []models.ChatUser {
+	stmt, err := db.DB.Prepare(`
 		SELECT user_id,
 			   username,
 			   user_first_name,
@@ -415,9 +420,9 @@ func getEnabledScoreListByChatId(chatId int64, scoreField string, timestampField
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	var chatUsers []ChatUser
+	var chatUsers []models.ChatUser
 	for rows.Next() {
-		chatUser := new(ChatUser)
+		chatUser := new(models.ChatUser)
 		err = rows.Scan(
 			&chatUser.UserId,
 			&chatUser.Username,
@@ -444,7 +449,7 @@ func ResetHeroScoreByChatId(chatId int64) {
 }
 
 func resetScoreByChatId(chatId int64, scoreField string, timestampField string) {
-	tx, err := DB.Begin()
+	tx, err := db.DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}

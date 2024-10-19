@@ -1,0 +1,18 @@
+services:
+  uofd:
+    build: .
+    container_name: uofd
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "128m"
+        max-file: "3"
+    ports:
+      - "8443:8443"
+    environment:
+      UOFD_CONFIG_FILE_PATH: "/opt/UOFDBot/config.yml"
+      UOFD_DB_FILE_PATH: "/opt/UOFDBot/uofd.db"
+    volumes:
+      - ./prod-config.yml:/opt/UOFDBot/config.yml
+      - ./uofd.db:/opt/UOFDBot/uofd.db

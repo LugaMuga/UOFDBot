@@ -1,4 +1,4 @@
-package main
+package models
 
 type ChatCallback struct {
 	Id              int64
@@ -7,7 +7,7 @@ type ChatCallback struct {
 	CreateTimestamp int64
 }
 
-func (chatCallback *ChatCallback) fill(chatId int64, text string, timestamp int64) {
+func (chatCallback *ChatCallback) Fill(chatId int64, text string, timestamp int64) {
 	chatCallback.ChatId = chatId
 	chatCallback.Text = text
 	chatCallback.CreateTimestamp = timestamp
