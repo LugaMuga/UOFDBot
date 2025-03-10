@@ -1,22 +1,27 @@
 # -----------------------------------------------------------------------------
 #  Build Stage
 # -----------------------------------------------------------------------------
-FROM golang:alpine3.20 AS build
+FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
+FROM --platform=$BUILDPLATFORM golang:alpine3.20 AS build
+
+ARG TARGETOS
+ARG TARGETARCH
+
+RUN apk add clang lld
+COPY --from=xx / /
+RUN xx-apk add --no-cache \
+ gcc \
+ musl-dev
 
 ENV CGO_ENABLED=1
-
-RUN apk add --no-cache \
-    gcc \
-    musl-dev
 
 WORKDIR /uofd
 
 COPY . /uofd/
 
-RUN \
-    cd /uofd && \
-    go mod tidy && \
-    go build
+RUN cd /uofd && \
+    xx-go mod tidy
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} xx-go build -tags musl --ldflags "-extldflags -static"
 
 # -----------------------------------------------------------------------------
 #  Run Stage
