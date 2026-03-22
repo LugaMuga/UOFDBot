@@ -1,10 +1,11 @@
 package dao
 
 import (
+	"log"
+
 	"github.com/LugaMuga/UOFDBot/internal/db"
 	"github.com/LugaMuga/UOFDBot/internal/models"
 	"github.com/LugaMuga/UOFDBot/internal/utils"
-	"log"
 )
 
 func SaveOrUpdateChatUser(chatUser models.ChatUser) {
@@ -228,7 +229,7 @@ func updateChatUserScore(chatUserId int, score int, scoreField string, timestamp
 	}
 }
 
-func FindChatUserByUserIdAndChatId(userId int, chatId int64) *models.ChatUser {
+func FindChatUserByUserIdAndChatId(userId int64, chatId int64) *models.ChatUser {
 	stmt, err := db.DB.Prepare(`
 		SELECT 	id,
 		       	chat_id,

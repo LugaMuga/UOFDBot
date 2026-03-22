@@ -1,13 +1,14 @@
 package locale
 
 import (
+	"log"
+	"os"
+	"path/filepath"
+
 	"github.com/LugaMuga/UOFDBot/internal/config"
 	"github.com/goccy/go-yaml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
-	"log"
-	"os"
-	"path/filepath"
 )
 
 const russianLangFile = `ru.yml`

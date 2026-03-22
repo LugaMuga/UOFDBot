@@ -1,16 +1,17 @@
 package main
 
 import (
+	"log"
+	"net/http"
+	"strings"
+
 	"github.com/LugaMuga/UOFDBot/internal/bot"
 	"github.com/LugaMuga/UOFDBot/internal/config"
 	"github.com/LugaMuga/UOFDBot/internal/db"
 	"github.com/LugaMuga/UOFDBot/internal/locale"
 	"github.com/LugaMuga/UOFDBot/internal/services"
 	"github.com/LugaMuga/UOFDBot/internal/utils"
-	tgbotapi "github.com/Syfaro/telegram-bot-api"
-	"log"
-	"net/http"
-	"strings"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func main() {
@@ -27,7 +28,11 @@ func main() {
 }
 
 func subscribeWithWebhook() {
-	_, err := bot.Bot.SetWebhook(tgbotapi.NewWebhookWithCert("https://"+config.Config.WebhookHost+":"+config.Config.WebhookPort+"/"+bot.Bot.Token, config.Config.WebhookCertPath))
+	webhookConfig, err := tgbotapi.NewWebhookWithCert("https://"+config.Config.WebhookHost+":"+config.Config.WebhookPort+"/"+bot.Bot.Token, tgbotapi.FilePath(config.Config.WebhookCertPath))
+	if err != nil {
+		log.Fatalf("Ошибка создания конфига вебхука: %v", err)
+	}
+	_, err = bot.Bot.Request(webhookConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,7 +55,7 @@ func subscribeToUpdatesChan() {
 	updateConfig := tgbotapi.NewUpdate(0)
 	updateConfig.Timeout = config.Config.BotTimeout
 
-	updates, _ := bot.Bot.GetUpdatesChan(updateConfig)
+	updates := bot.Bot.GetUpdatesChan(updateConfig)
 
 	for update := range updates {
 		applyUpdate(update)
@@ -68,56 +73,51 @@ func applyUpdate(update tgbotapi.Update) {
 }
 
 func applyCommand(update tgbotapi.Update) {
-	if update.Message == nil {
-		return
-	}
-	if update.Message.Entities == nil ||
-		len(*update.Message.Entities) == 0 ||
-		(*update.Message.Entities)[0].Type != `bot_command` {
+	if update.Message == nil || !update.Message.IsCommand() {
 		return
 	}
 
 	log.Printf("[%s] %s", utils.FormatUserNameFromApi(update.Message.From), update.Message.Text)
 
 	message := update.Message
-	switch update.Message.Text {
-	case `/start`, `/start@` + config.Config.BotName:
+	switch message.Command() {
+	case `start`:
 		msg := locale.Loc(locale.DefaultLang, `hello`)
 		bot.SendMessage(update.Message.Chat.ID, msg)
-		break
-	case `/register`, `/register@` + config.Config.BotName:
+
+	case `register`:
 		services.Register(*message)
-		break
-	case `/delete`, `/delete@` + config.Config.BotName:
+
+	case `delete`:
 		services.Delete(message.Chat.ID, message.From)
-		break
-	case `/run`, `/run@` + config.Config.BotName:
+
+	case `run`:
 		services.Run(message.Chat.ID)
-		break
-	case `/list`, `/list@` + config.Config.BotName:
+
+	case `list`:
 		services.List(message.Chat.ID)
-		break
-	case `/pidor`, `/pidor@` + config.Config.BotName:
+
+	case `pidor`:
 		services.Pidor(message.Chat.ID)
-		break
-	case `/pidorlist`, `/pidorlist@` + config.Config.BotName:
+
+	case `pidorlist`:
 		services.PidorList(message.Chat.ID)
-		break
-	case `/resetpidor`, `/resetpidor@` + config.Config.BotName:
+
+	case `resetpidor`:
 		services.ResetApproval(message.Chat.ID, services.ResetPidorPoll)
-		break
-	case `/hero`, `/hero@` + config.Config.BotName:
+
+	case `hero`:
 		services.Hero(message.Chat.ID)
-		break
-	case `/herolist`, `/herolist@` + config.Config.BotName:
+
+	case `herolist`:
 		services.HeroList(message.Chat.ID)
-		break
-	case `/resethero`, `/resethero@` + config.Config.BotName:
+
+	case `resethero`:
 		services.ResetApproval(message.Chat.ID, services.ResetHeroPoll)
-		break
-	case `/update`, `/update@` + config.Config.BotName:
+
+	case `update`:
 		services.UpdateUsers(message.Chat.ID)
-		break
+
 	default:
 		break
 	}

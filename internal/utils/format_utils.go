@@ -1,13 +1,14 @@
 package utils
 
 import (
-	"github.com/LugaMuga/UOFDBot/internal/config"
-	"github.com/LugaMuga/UOFDBot/internal/locale"
-	"github.com/LugaMuga/UOFDBot/internal/models"
-	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/LugaMuga/UOFDBot/internal/config"
+	"github.com/LugaMuga/UOFDBot/internal/locale"
+	"github.com/LugaMuga/UOFDBot/internal/models"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type winFunc func(int) int

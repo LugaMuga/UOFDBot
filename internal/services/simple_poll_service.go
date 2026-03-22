@@ -1,13 +1,14 @@
 package services
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/LugaMuga/UOFDBot/internal/dao"
 	"github.com/LugaMuga/UOFDBot/internal/locale"
 	"github.com/LugaMuga/UOFDBot/internal/models"
 	"github.com/LugaMuga/UOFDBot/internal/utils"
-	tgbotapi "github.com/Syfaro/telegram-bot-api"
-	"strconv"
-	"strings"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 const SimplePollUserDelimiter = `|`

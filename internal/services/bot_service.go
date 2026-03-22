@@ -2,14 +2,15 @@ package services
 
 import (
 	"crypto/rand"
+	"log"
+	"math/big"
+
 	"github.com/LugaMuga/UOFDBot/internal/bot"
 	"github.com/LugaMuga/UOFDBot/internal/dao"
 	"github.com/LugaMuga/UOFDBot/internal/locale"
 	"github.com/LugaMuga/UOFDBot/internal/models"
 	"github.com/LugaMuga/UOFDBot/internal/utils"
-	tgbotapi "github.com/Syfaro/telegram-bot-api"
-	"log"
-	"math/big"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type CallbackQueryType string
@@ -79,9 +80,11 @@ func Pidor(chatId int64) {
 func UpdateUsers(chatId int64) {
 	chatUsers := dao.GetEnabledChatUsersByChatId(chatId)
 	for _, value := range chatUsers {
-		chatConfig := tgbotapi.ChatConfigWithUser{
-			ChatID: chatId,
-			UserID: value.UserId,
+		chatConfig := tgbotapi.GetChatMemberConfig{
+			ChatConfigWithUser: tgbotapi.ChatConfigWithUser{
+				ChatID: chatId,
+				UserID: value.UserId,
+			},
 		}
 		updateUser(chatId, chatConfig, value)
 	}
@@ -89,7 +92,7 @@ func UpdateUsers(chatId int64) {
 	bot.SendMessage(chatId, msg)
 }
 
-func updateUser(chatId int64, chatConfig tgbotapi.ChatConfigWithUser, user models.ChatUser) {
+func updateUser(chatId int64, chatConfig tgbotapi.GetChatMemberConfig, user models.ChatUser) {
 	userTemp, err := bot.Bot.GetChatMember(chatConfig)
 	if err != nil {
 		log.Printf("user not found userId: %d, chatId: %d, err: %q", chatConfig.UserID, chatId, err)

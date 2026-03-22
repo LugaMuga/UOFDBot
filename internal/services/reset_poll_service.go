@@ -1,15 +1,16 @@
 package services
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/LugaMuga/UOFDBot/internal/bot"
 	"github.com/LugaMuga/UOFDBot/internal/config"
 	"github.com/LugaMuga/UOFDBot/internal/dao"
 	"github.com/LugaMuga/UOFDBot/internal/locale"
 	"github.com/LugaMuga/UOFDBot/internal/models"
 	"github.com/LugaMuga/UOFDBot/internal/utils"
-	tgbotapi "github.com/Syfaro/telegram-bot-api"
-	"strconv"
-	"strings"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 const ResetPidorPoll = `RESET_PIDOR`
@@ -91,7 +92,7 @@ func resetByPollName(chatId int64, msgId int, callbackId string, pollName string
 		break
 	default:
 		msg := locale.Loc(locale.DefaultLang, `stat_not_reset`)
-		bot.Bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackId, msg))
+		bot.Bot.Request(tgbotapi.NewCallback(callbackId, msg))
 		bot.SendMessage(chatId, msg)
 	}
 	deleteKeyBoardMsg := tgbotapi.NewDeleteMessage(chatId, msgId)

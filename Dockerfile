@@ -2,18 +2,18 @@
 #  Build Stage
 # -----------------------------------------------------------------------------
 FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
-FROM --platform=$BUILDPLATFORM golang:alpine3.20 AS build
+FROM --platform=$BUILDPLATFORM dhi.io/golang:1.26.1-alpine3.23-dev AS build
 
+ARG TARGETPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
 
-RUN apk add clang lld
+RUN apk add --update --no-cache zig
 COPY --from=xx / /
-RUN xx-apk add --no-cache \
- gcc \
- musl-dev
+RUN xx-apk add --no-cache musl-dev 
 
 ENV CGO_ENABLED=1
+ENV XX_GO_PREFER_C_COMPILER=zig
 
 WORKDIR /uofd
 
@@ -26,7 +26,7 @@ RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} xx-go build -tags musl --ldflags "-ext
 # -----------------------------------------------------------------------------
 #  Run Stage
 # -----------------------------------------------------------------------------
-FROM alpine:3.20.3
+FROM dhi.io/alpine-base:3.23
 
 COPY --from=build /uofd/UOFDBot /opt/UOFDBot/UOFDBot
 

@@ -1,11 +1,11 @@
 package models
 
-import tgbotapi "github.com/Syfaro/telegram-bot-api"
+import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 type ChatUser struct {
 	Id                 int
 	ChatId             int64
-	UserId             int
+	UserId             int64
 	Username           string
 	UserFirstName      string
 	UserLastName       string

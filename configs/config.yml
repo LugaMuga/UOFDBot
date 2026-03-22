@@ -10,3 +10,8 @@ webhook_port: 8443
 webhook_cert_path: cert.pem
 webhook_key_path: key.pem
 server_adress: 0.0.0.0
+proxy:
+  type: http
+  address: 192.168.1.1
+  user: user
+  password: password
